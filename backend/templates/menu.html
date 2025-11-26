@@ -1,0 +1,330 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Canteen — Menu</title>
+
+  <style>
+    :root {
+      --primary: #FF7A00;
+      --accent: #FF4D4D;
+      --bg: #fff7f2;
+      --card: #ffffff;
+      --muted: #7a7a7a;
+      --text: #111827;
+      --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.08);
+      --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 25px;
+    }
+
+    /* ---------------- HEADER ---------------- */
+    header.topbar {
+      grid-column: 1 / span 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      background: var(--primary);
+      height: 50px;
+      width: 50px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .auth-bubble {
+      background: white;
+      padding: 8px 18px;
+      border-radius: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ---------------- MENU GRID ---------------- */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .thumb {
+      height: 150px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .card-body {
+      padding: 14px;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .price {
+      font-size: 18px;
+      margin-top: 6px;
+      font-weight: bold;
+    }
+
+    .add-btn {
+      padding: 10px;
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      margin-top: 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* ---------------- CART ---------------- */
+    .cart-panel {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-md);
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .qty-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .qty-btn {
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .checkout-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      color: white;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="topbar">
+      <div class="logo">SC</div>
+      <div class="auth-bubble" id="cartCount">Cart (0)</div>
+    </header>
+
+    <!-- MENU GRID -->
+    <div>
+      <h2>Menu</h2>
+      <div id="menuGrid" class="menu-grid"></div>
+    </div>
+
+    <!-- CART PANEL -->
+    <div class="cart-panel">
+      <h3>Your Cart</h3>
+      <div id="cartList">Your cart is empty</div>
+
+      <h3 style="margin-top:20px;">Total: <span id="totalAmount">₹0.00</span></h3>
+
+      <button class="checkout-btn" id="checkoutBtn" disabled>Checkout</button>
+    </div>
+
+  </div>
+
+  <script>
+    /* ---------------- API ---------------- */
+    const api = {
+      menu: "http://127.0.0.1:8000/menu"
+    };
+
+    let menuItems = [];
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    /* ========== LOAD MENU ========== */
+    async function loadMenu() {
+      const res = await fetch(api.menu);
+      menuItems = await res.json();
+      renderMenu();
+      renderCart();
+    }
+    loadMenu();
+
+    /* ========== RENDER MENU ========== */
+    function renderMenu() {
+      const grid = document.getElementById("menuGrid");
+      grid.innerHTML = "";
+
+      menuItems.forEach(item => {
+        grid.innerHTML += `
+          <div class="card">
+            <div class="thumb" style="background-image:url('${item.image}')"></div>
+            <div class="card-body">
+              <div class="title">${item.name}</div>
+              <div class="sub">${item.desc}</div>
+              <div class="price">₹${item.price}</div>
+              <button class="add-btn" onclick="addToCart(${item.id})">Add</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    /* ========== ADD TO CART ========== */
+    function addToCart(id) {
+      const item = menuItems.find(i => i.id == id);
+
+      let existing = cart.find(i => i.id == id);
+
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ ...item, qty: 1 });
+      }
+
+      saveCart();
+      renderCart();
+    }
+
+    /* ========== UPDATE QTY ========== */
+    function increaseQty(id) {
+      cart.find(i => i.id == id).qty++;
+      saveCart();
+      renderCart();
+    }
+
+    function decreaseQty(id) {
+      let item = cart.find(i => i.id == id);
+      item.qty--;
+
+      if (item.qty <= 0) {
+        cart = cart.filter(i => i.id != id);
+      }
+
+      saveCart();
+      renderCart();
+    }
+
+    /* ========== RENDER CART ========== */
+    function renderCart() {
+      const list = document.getElementById("cartList");
+      const totalEl = document.getElementById("totalAmount");
+      const countEl = document.getElementById("cartCount");
+      const checkoutBtn = document.getElementById("checkoutBtn");
+
+      if (cart.length === 0) {
+        list.innerHTML = "Your cart is empty";
+        totalEl.textContent = "₹0.00";
+        countEl.textContent = "Cart (0)";
+        checkoutBtn.disabled = true;
+        return;
+      }
+
+      let html = "";
+      let total = 0;
+      let count = 0;
+
+      cart.forEach(item => {
+        total += item.price * item.qty;
+        count += item.qty;
+
+        html += `
+          <div class="cart-item">
+            <div>
+              <strong>${item.name}</strong><br>
+              ₹${item.price} × ${item.qty}
+            </div>
+
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="decreaseQty(${item.id})">−</button>
+              <span>${item.qty}</span>
+              <button class="qty-btn" onclick="increaseQty(${item.id})">+</button>
+            </div>
+          </div>
+        `;
+      });
+
+      list.innerHTML = html;
+      totalEl.textContent = "₹" + total.toFixed(2);
+      countEl.textContent = `Cart (${count})`;
+      checkoutBtn.disabled = false;
+    }
+
+    /* ========== SAVE CART ========== */
+    function saveCart() {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    /* ========== CHECKOUT BUTTON ========== */
+    document.getElementById("checkoutBtn").addEventListener("click", () => {
+      saveCart();
+      window.location.href = "checkout.html";  // GST will show on that page
+    });
+  </script>
+
+</body>
+</html>

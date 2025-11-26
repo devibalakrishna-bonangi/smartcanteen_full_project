@@ -7,24 +7,27 @@ SECRET_KEY = 'change-me-to-a-random-secret-key'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = []  # For deployment: ['*'] or your Render URL
 
+
+# -------------------- INSTALLED APPS --------------------
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-     'corsheaders',
-
     'django.contrib.staticfiles',
 
+    'corsheaders',
     'rest_framework',
     'api',
 ]
 
+
+# -------------------- MIDDLEWARE --------------------
 MIDDLEWARE = [
-     'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -34,12 +37,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'smartcanteen.urls'
 
+
+# -------------------- TEMPLATES --------------------
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+
+        # ⭐ IMPORTANT: your templates folder
+        'DIRS': [
+            BASE_DIR / 'templates'
+        ],
+
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -52,9 +63,11 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'smartcanteen.wsgi.application'
 
-# --- MySQL DATABASE: change credentials below ---
+
+# -------------------- DATABASE (MySQL) --------------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -66,13 +79,30 @@ DATABASES = {
     }
 }
 
+
 AUTH_PASSWORD_VALIDATORS = []
+
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+
+# -------------------- STATIC FILES --------------------
 STATIC_URL = '/static/'
+
+# ⭐ This points to your "backend/static" folder
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# ⭐ Deployment folder (Render uses this)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
+# -------------------- CORS --------------------
 CORS_ALLOW_ALL_ORIGINS = True
 
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
