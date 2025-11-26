@@ -75,14 +75,11 @@ WSGI_APPLICATION = 'smartcanteen.wsgi.application'
 # -------------------- DATABASE (MySQL) --------------------
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'smartcanteen',
-        'USER': 'root',
-        'PASSWORD': 'Devil9443u123@',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 
 AUTH_PASSWORD_VALIDATORS = []
