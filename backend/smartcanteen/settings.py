@@ -7,7 +7,12 @@ SECRET_KEY = 'change-me-to-a-random-secret-key'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []  # For deployment: ['*'] or your Render URL
+ALLOWED_HOSTS = [
+    'smartcanteen-full-project.onrender.com',
+    'localhost',
+    '127.0.0.1',
+]
+  # For deployment: ['*'] or your Render URL
 
 
 # -------------------- INSTALLED APPS --------------------
